@@ -38,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     try {
                         RandomAccessFile reader = new RandomAccessFile("/sys/class/power_supply/battery/current_now", "r");
-                        String average = reader.readLine();
-                        currentCurrent = Integer.parseInt(average) / 1_000_000.0;
+                        String currentStr = reader.readLine();
+                        currentCurrent = Integer.parseInt(currentStr) / 1_000_000.0;
                         reader.close();
                     } catch (IOException e) {
                         e.printStackTrace();
