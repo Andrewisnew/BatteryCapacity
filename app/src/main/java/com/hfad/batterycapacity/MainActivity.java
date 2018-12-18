@@ -7,8 +7,10 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,14 +25,28 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                BatteryManager mBatteryManager = (BatteryManager)
-                        getSystemService(BATTERY_SERVICE);
 
                 double currentVoltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000.0;
                 String currentVoltageStr = Double.toString(currentVoltage);
                 voltageValView.setText(currentVoltageStr);
 
-                double currentCurrent = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) / 1000.0;
+                double currentCurrent = 0;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    BatteryManager mBatteryManager = (BatteryManager)
+                            getSystemService(BATTERY_SERVICE);
+                    currentCurrent = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW) / 1000.0;
+                } else {
+                    try {
+                        RandomAccessFile reader = new RandomAccessFile("/sys/class/power_supply/battery/current_now", "r");
+                        String average = reader.readLine();
+                        currentCurrent = Integer.parseInt(average) / 1_000_000.0;
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
                 String currentCurrentStr = Double.toString(currentCurrent);
                 currentValView.setText(currentCurrentStr);
             }
