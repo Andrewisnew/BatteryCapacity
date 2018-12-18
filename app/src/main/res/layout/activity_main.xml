@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/voltage_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="37dp"
+        android:text="@string/voltage_label" />
+
+    <TextView
+        android:id="@+id/voltage_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/voltage_label"
+        android:layout_toEndOf="@id/voltage_label"
+        android:layout_marginStart="5dp" />
+
+    <TextView
+        android:id="@+id/voltage_derived_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/voltage_value"
+        android:layout_toEndOf="@id/voltage_value"
+        android:layout_marginStart="5dp"
+        android:text="@string/voltage_derived_unit" />
+
+    <TextView
+        android:id="@+id/current_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/voltage_label"
+        android:layout_below="@+id/voltage_label"
+        android:layout_marginTop="18dp"
+        android:text="@string/current_label" />
+
+    <TextView
+        android:id="@+id/current_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/current_label"
+        android:layout_toEndOf="@id/current_label"
+        android:layout_marginStart="5dp" />
+
+    <TextView
+        android:id="@+id/current_derived_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/current_value"
+        android:layout_toEndOf="@id/current_value"
+        android:layout_marginStart="5dp"
+        android:text="@string/current_derived_unit" />
+</RelativeLayout>
