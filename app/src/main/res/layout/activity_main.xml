@@ -56,4 +56,30 @@
         android:layout_toEndOf="@id/current_value"
         android:layout_marginStart="5dp"
         android:text="@string/current_derived_unit" />
+
+    <TextView
+        android:id="@+id/power_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/current_label"
+        android:layout_below="@+id/current_label"
+        android:layout_marginTop="18dp"
+        android:text="@string/power_label" />
+
+    <TextView
+        android:id="@+id/power_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/power_label"
+        android:layout_toEndOf="@id/power_label"
+        android:layout_marginStart="5dp" />
+
+    <TextView
+        android:id="@+id/power_derived_unit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/power_value"
+        android:layout_toEndOf="@id/power_value"
+        android:layout_marginStart="5dp"
+        android:text="@string/power_derived_unit" />
 </RelativeLayout>

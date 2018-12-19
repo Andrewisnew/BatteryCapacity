@@ -2,6 +2,8 @@
     <string name="app_name">BatteryCapacity</string>
     <string name="voltage_label">voltage :</string>
     <string name="current_label">current :</string>
+    <string name="power_label">power :</string>
     <string name="voltage_derived_unit">V</string>
     <string name="current_derived_unit">A</string>
+    <string name="power_derived_unit">W</string>
 </resources>

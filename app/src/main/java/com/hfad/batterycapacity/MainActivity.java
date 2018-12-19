@@ -1,5 +1,6 @@
 package com.hfad.batterycapacity;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final TextView voltageValView = findViewById(R.id.voltage_value);
         final TextView currentValView = findViewById(R.id.current_value);
+        final TextView powerValView = findViewById(R.id.power_value);
 
         BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
 
@@ -27,7 +29,8 @@ public class MainActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
 
                 double currentVoltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000.0;
-                String currentVoltageStr = Double.toString(currentVoltage);
+                @SuppressLint("DefaultLocale")
+                String currentVoltageStr = String.format("%.3f", currentVoltage);
                 voltageValView.setText(currentVoltageStr);
 
                 double currentCurrent = 0;
@@ -47,8 +50,14 @@ public class MainActivity extends AppCompatActivity {
                 }
 
 
-                String currentCurrentStr = Double.toString(currentCurrent);
+                @SuppressLint("DefaultLocale")
+                String currentCurrentStr = String.format("%.3f", currentCurrent);
                 currentValView.setText(currentCurrentStr);
+
+                @SuppressLint("DefaultLocale")
+                String currentPowerStr = String.format("%.3f" ,currentVoltage * currentCurrent);
+                powerValView.setText(currentPowerStr);
+
             }
         };
         IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
