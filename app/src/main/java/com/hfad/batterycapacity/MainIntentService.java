@@ -18,7 +18,7 @@ import java.io.RandomAccessFile;
 
 public class MainIntentService extends IntentService {
 
-    public static final int PERIOD = 5;
+    public static int PERIOD;
     private double curCurrent;
     private double curVoltage;
     private int curLevel = -1;
@@ -45,8 +45,7 @@ public class MainIntentService extends IntentService {
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(intent);
         PendingIntent pendingIntent =
-                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT
-                );
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification notification = new Notification.Builder(this)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(getString(R.string.app_name))

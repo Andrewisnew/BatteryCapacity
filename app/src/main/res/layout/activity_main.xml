@@ -6,94 +6,10 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/voltage_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="37dp"
-        android:text="@string/voltage_label" />
-
-    <TextView
-        android:id="@+id/voltage_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/voltage_label"
-        android:layout_toEndOf="@id/voltage_label"
-        android:layout_marginStart="5dp" />
-
-    <TextView
-        android:id="@+id/voltage_derived_unit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/voltage_value"
-        android:layout_toEndOf="@id/voltage_value"
-        android:layout_marginStart="5dp"
-        android:text="@string/voltage_derived_unit" />
-
-    <TextView
-        android:id="@+id/current_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/voltage_label"
-        android:layout_below="@+id/voltage_label"
-        android:layout_marginTop="18dp"
-        android:text="@string/current_label" />
-
-    <TextView
-        android:id="@+id/current_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/current_label"
-        android:layout_toEndOf="@id/current_label"
-        android:layout_marginStart="5dp" />
-
-    <TextView
-        android:id="@+id/current_derived_unit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/current_value"
-        android:layout_toEndOf="@id/current_value"
-        android:layout_marginStart="5dp"
-        android:text="@string/current_derived_unit" />
-
-    <TextView
-        android:id="@+id/level_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/current_label"
-        android:layout_below="@+id/current_label"
-        android:layout_marginTop="18dp"
-        android:text="@string/level_label" />
-
-    <TextView
-        android:id="@+id/level_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/level_label"
-        android:layout_toEndOf="@id/level_label"
-        android:layout_marginStart="5dp" />
-
-    <HorizontalScrollView
-        android:id="@+id/history_scroll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/level_label"
-        android:layout_marginTop="18dp">
-
-        <GridLayout
-            android:id="@+id/metering_history"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:rowCount="3" />
-    </HorizontalScrollView>
-
-    <TextView
         android:id="@+id/capacity_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/history_scroll"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="37dp"
         android:text="@string/capacity_label" />
@@ -110,9 +26,32 @@
         android:id="@+id/capacity_derived_unit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/capacity_value"
+        android:layout_alignTop="@id/capacity_value"
         android:layout_toEndOf="@id/capacity_value"
         android:layout_marginStart="5dp"
         android:text="@string/capacity_derived_unit" />
+
+    <HorizontalScrollView
+        android:id="@+id/history_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/capacity_label"
+        android:layout_marginTop="18dp">
+
+        <GridLayout
+            android:id="@+id/metering_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:rowCount="3" />
+    </HorizontalScrollView>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/reset"
+        android:layout_below="@id/history_scroll"
+        android:layout_centerHorizontal="true"
+        android:onClick="reset"
+        />
 
 </RelativeLayout>

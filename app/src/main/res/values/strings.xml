@@ -1,10 +1,8 @@
 <resources>
     <string name="app_name">BatteryCapacity</string>
-    <string name="voltage_label">Voltage :</string>
-    <string name="current_label">Current :</string>
-    <string name="level_label">Level :</string>
     <string name="capacity_label">Capacity :</string>
-    <string name="voltage_derived_unit">V</string>
-    <string name="current_derived_unit">A</string>
     <string name="capacity_derived_unit">mAh</string>
+    <string name="reset">Reset</string>
+    <string name="enter_period">Enter period</string>
+    <string name="set">Set</string>
 </resources>

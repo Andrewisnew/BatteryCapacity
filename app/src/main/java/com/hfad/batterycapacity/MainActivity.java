@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,74 +21,96 @@ import android.widget.Toast;
 public class MainActivity extends Activity {
 
     public static final String ADD_STATE = "ADD_STATE";
-    public static final String CAPACITY = "capacity";
     private int historyRecords;
-
+    private static boolean periodIsSet;
     private SQLiteDatabase db;
     private int startLevel;
     private int curLevel;
-    private static final int NUM_OF_METERINGS_PER_HOUR = 3600 / MainIntentService.PERIOD;
-    private static final double NOMINAL_VOLTAGE = 3.8;
+    private static int NUM_OF_METERINGS_PER_HOUR;
+
+    public static void setPeriodIsSet(boolean periodIsSetted) {
+        MainActivity.periodIsSet = periodIsSetted;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        try {
-            db = new BatteryCapacityDBHelper(this).getReadableDatabase();
-        } catch (SQLiteException e) {
-            Log.d("SQLiteException", e.getMessage());
-            Toast toast = Toast.makeText(this, "Database unavailable", Toast.LENGTH_SHORT);
-            toast.show();
-        }
+        if(!periodIsSet){
+            Intent intent = new Intent(this, SetPeriodActivity.class);
+            startActivity(intent);
+        }else {
+            NUM_OF_METERINGS_PER_HOUR = 3600 / MainIntentService.PERIOD;
+            try {
+                db = new BatteryCapacityDBHelper(this).getReadableDatabase();
+            } catch (SQLiteException e) {
+                Log.d("SQLiteException", e.getMessage());
+                Toast toast = Toast.makeText(this, "Database unavailable", Toast.LENGTH_SHORT);
+                toast.show();
+            }
 
-        addMeteringHistory();
+            addMeteringHistory();
 
-        final TextView voltageValView = findViewById(R.id.voltage_value);
-        final TextView currentValView = findViewById(R.id.current_value);
-        final TextView levelValView = findViewById(R.id.level_value);
-        final TextView capacityValView = findViewById(R.id.capacity_value);
+            final TextView capacityValView = findViewById(R.id.capacity_value);
 
-        BroadcastReceiver br = new BroadcastReceiver() {
-            @SuppressLint("DefaultLocale")
-            public void onReceive(Context context, Intent intent) {
-                Cursor cursor = db.query("STATE",
-                        new String[]{"VOLTAGE", "CURRENT", "LEVEL"},
-                        null, null, null, null, null);
-                if (cursor.moveToLast()) {
-                    curLevel = cursor.getInt(2);
-                    voltageValView
-                            .setText(String.format("%.2f", cursor.getDouble(0)));
-                    currentValView
-                            .setText(String.format("%.2f", cursor.getDouble(1)));
-                    levelValView.setText(String.valueOf(curLevel));
-
-                    GridLayout gridLayout = findViewById(R.id.metering_history);
-                    addToHistory(cursor, gridLayout);
-
-                    if (cursor.moveToFirst()) {
-                        int capacity;
-                        double sumOfPowers = 0;
-                        startLevel = cursor.getInt(2);
-                        do {
-                            sumOfPowers += cursor.getDouble(0) * cursor.getDouble(1);
-                        } while (cursor.moveToNext());
-
-                        if (startLevel != curLevel) {
-                            capacity = (int) (sumOfPowers / (NOMINAL_VOLTAGE * NUM_OF_METERINGS_PER_HOUR)
-                                                                * 100 / (curLevel - startLevel) * 1000);
-                            capacityValView.setText(String.valueOf(capacity));
+            BroadcastReceiver br = new BroadcastReceiver() {
+                @SuppressLint("DefaultLocale")
+                public void onReceive(Context context, Intent intent) {
+                    Cursor cursor = db.query("STATE",
+                            new String[]{"VOLTAGE", "CURRENT", "LEVEL"},
+                            null, null, null, null, null);
+                    if (cursor.moveToLast()) {
+                        curLevel = cursor.getInt(2);
+                        GridLayout gridLayout = findViewById(R.id.metering_history);
+                        if (historyRecords >= 30) {
+                            gridLayout.removeAllViews();
+                            cursor.moveToPosition(cursor.getPosition() - 30);
+                            historyRecords = 0;
+                            for (int i = 0; i < 30; i++) {
+                                addToHistory(cursor, gridLayout);
+                                cursor.moveToNext();
+                            }
                         } else {
-                            capacityValView.setText("-");
+                            addToHistory(cursor, gridLayout);
+                        }
+
+                        if (cursor.moveToFirst()) {
+                            int capacity;
+                            double sumOfPowers = 0;
+                            startLevel = cursor.getInt(2);
+                            do {
+                                sumOfPowers += cursor.getDouble(0) * cursor.getDouble(1);
+                            } while (cursor.moveToNext());
+
+                            if (startLevel != curLevel) {
+                                capacity = (int) (sumOfPowers / (getAvgVoltage() * NUM_OF_METERINGS_PER_HOUR)
+                                        * 100 / (curLevel - startLevel) * 1000);
+                                capacityValView.setText(String.valueOf(capacity));
+                            } else {
+                                capacityValView.setText("-");
+                            }
                         }
                     }
+                    cursor.close();
                 }
+            };
+            registerReceiver(br, new IntentFilter(ADD_STATE));
+            Intent intent = new Intent(this, MainIntentService.class);
+            startService(intent);
+        }
+    }
+
+    private double getAvgVoltage() {
+        Cursor cursor=null;
+        try {
+            cursor = db.rawQuery("SELECT AVG(VOLTAGE) FROM STATE", null);
+            cursor.moveToFirst();
+            return cursor.getDouble(0);
+        }finally {
+            if(cursor!=null){
                 cursor.close();
             }
-        };
-        registerReceiver(br, new IntentFilter(ADD_STATE));
-        Intent intent = new Intent(this, MainIntentService.class);
-        startService(intent);
+        }
     }
 
     @SuppressLint("DefaultLocale")
@@ -119,7 +142,7 @@ public class MainActivity extends Activity {
     private void addMeteringHistory() {
         Cursor cursor = db.query("STATE",
                 new String[]{"VOLTAGE", "CURRENT", "LEVEL"},
-                null, null, null, null, "_id DESC", "100");
+                null, null, null, null, "_id DESC", "30");
         GridLayout gridLayout = findViewById(R.id.metering_history);
         if (cursor.moveToLast()) {
             while (cursor.moveToPrevious()) {
@@ -129,4 +152,10 @@ public class MainActivity extends Activity {
         cursor.close();
     }
 
+    public void reset(View view) {
+        db.execSQL("delete from STATE");
+        historyRecords = 0;
+        GridLayout gridLayout = findViewById(R.id.metering_history);
+        gridLayout.removeAllViews();
+    }
 }

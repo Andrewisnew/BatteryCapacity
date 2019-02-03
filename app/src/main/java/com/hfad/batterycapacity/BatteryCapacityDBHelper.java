@@ -22,10 +22,13 @@ public class BatteryCapacityDBHelper extends SQLiteOpenHelper {
 
     private void updateDatabase(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 1) {
-            db.execSQL("CREATE TABLE STATE (_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            db.execSQL("CREATE TABLE IF NOT EXISTS STATE (_id INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + "VOLTAGE REAL, "
                     + "CURRENT REAL, "
                     + "LEVEL INTEGER);");
+            db.execSQL("CREATE TABLE IF NOT EXISTS VALS (_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "NAME TEXT, "
+                    + "VAL INTEGER);");
         }
     }
     public static void insert(SQLiteDatabase db, double voltage, double current, int level) {

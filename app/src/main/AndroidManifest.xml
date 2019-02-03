@@ -33,6 +33,7 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".SetPeriodActivity"/>
     </application>
 
 </manifest>
