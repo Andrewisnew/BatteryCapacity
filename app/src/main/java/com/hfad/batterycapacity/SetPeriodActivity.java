@@ -42,8 +42,5 @@ public class SetPeriodActivity extends AppCompatActivity {
 
             startActivity(intent);
         }
-
-
-
     }
 }

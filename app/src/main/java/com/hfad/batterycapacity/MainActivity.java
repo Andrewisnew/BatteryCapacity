@@ -36,18 +36,21 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if(!periodIsSet){
+        try {
+            db = new BatteryCapacityDBHelper(this).getReadableDatabase();
+        } catch (SQLiteException e) {
+            Log.d("SQLiteException", e.getMessage());
+            Toast toast = Toast.makeText(this, "Database unavailable", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+        Cursor c = db.rawQuery("SELECT * FROM VALS WHERE NAME = 'period'", null);
+        if(!c.moveToFirst()) {
             Intent intent = new Intent(this, SetPeriodActivity.class);
             startActivity(intent);
         }else {
+            MainIntentService.PERIOD = Integer.parseInt(c.getString(2));
             NUM_OF_METERINGS_PER_HOUR = 3600 / MainIntentService.PERIOD;
-            try {
-                db = new BatteryCapacityDBHelper(this).getReadableDatabase();
-            } catch (SQLiteException e) {
-                Log.d("SQLiteException", e.getMessage());
-                Toast toast = Toast.makeText(this, "Database unavailable", Toast.LENGTH_SHORT);
-                toast.show();
-            }
+
 
             addMeteringHistory();
 
