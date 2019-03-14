@@ -2,6 +2,8 @@ package com.hfad.batterycapacity;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
@@ -46,7 +48,23 @@ public class MainIntentService extends IntentService {
         stackBuilder.addNextIntent(intent);
         PendingIntent pendingIntent =
                 stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notification = new Notification.Builder(this)
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        String channelId = getString(R.string.app_name);
+        Notification.Builder notificationBuilder;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_DEFAULT);
+            notificationChannel.setDescription(channelId);
+            notificationChannel.setSound(null, null);
+
+            notificationManager.createNotificationChannel(notificationChannel);
+
+            notificationBuilder = new Notification.Builder(this, channelId);
+        } else {
+            notificationBuilder = new Notification.Builder(this);
+        }
+
+        Notification notification = notificationBuilder
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText("Calculation")
