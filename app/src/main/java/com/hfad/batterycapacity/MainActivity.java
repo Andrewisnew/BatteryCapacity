@@ -17,21 +17,18 @@ import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hfad.batterycapacity.config.Preferences;
+
 
 public class MainActivity extends Activity {
 
     public static final String ADD_STATE = "ADD_STATE";
     private int historyRecords;
-    private static boolean periodIsSet;
     private SQLiteDatabase db;
     private int startLevel;
     private int curLevel;
     private static int NUM_OF_METERINGS_PER_HOUR;
-
-    public static void setPeriodIsSet(boolean periodIsSetted) {
-        MainActivity.periodIsSet = periodIsSetted;
-    }
-
+    private Preferences preferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,14 +40,15 @@ public class MainActivity extends Activity {
             Toast toast = Toast.makeText(this, "Database unavailable", Toast.LENGTH_SHORT);
             toast.show();
         }
-        Cursor c = db.rawQuery("SELECT * FROM VALS WHERE NAME = 'period'", null);
-        if(!c.moveToFirst()) {
+
+        preferences = new Preferences(this);
+
+        int p = preferences.loadPeriod();
+        if(p == -1){
             Intent intent = new Intent(this, SetPeriodActivity.class);
             startActivity(intent);
         }else {
-            MainIntentService.PERIOD = Integer.parseInt(c.getString(2));
-            NUM_OF_METERINGS_PER_HOUR = 3600 / MainIntentService.PERIOD;
-
+            NUM_OF_METERINGS_PER_HOUR = 3600 / p;
 
             addMeteringHistory();
 
@@ -161,4 +159,5 @@ public class MainActivity extends Activity {
         GridLayout gridLayout = findViewById(R.id.metering_history);
         gridLayout.removeAllViews();
     }
+
 }

@@ -10,17 +10,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.BatteryManager;
 import android.widget.Toast;
 
+import com.hfad.batterycapacity.config.Preferences;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class MainIntentService extends IntentService {
+    private Preferences preferences;
 
-    public static int PERIOD;
     private double curCurrent;
     private double curVoltage;
     private int curLevel = -1;
@@ -34,7 +37,7 @@ public class MainIntentService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        preferences = new Preferences(this);
         try {
             db = new BatteryCapacityDBHelper(this).getWritableDatabase();
         } catch(SQLiteException e) {
@@ -86,10 +89,11 @@ public class MainIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         registerBatteryResiver();
+        int period = preferences.loadPeriod();
         while (true) {
             synchronized (this) {
                 try {
-                    wait(PERIOD * 1000);
+                    wait(period * 1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -136,5 +140,7 @@ public class MainIntentService extends IntentService {
         IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         registerReceiver(batteryReceiver, filter);
     }
+
+
 
 }
