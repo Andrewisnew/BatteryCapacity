@@ -23,7 +23,10 @@ import com.hfad.batterycapacity.config.Preferences;
 public class MainActivity extends Activity {
 
     public static final String ADD_STATE = "ADD_STATE";
-    private int historyRecords;
+
+    private static boolean created = false;
+
+    private int historyRecordsSize;
     private SQLiteDatabase db;
     private int startLevel;
     private int curLevel;
@@ -33,6 +36,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        created = true;
         try {
             db = new BatteryCapacityDBHelper(this).getReadableDatabase();
         } catch (SQLiteException e) {
@@ -63,10 +67,10 @@ public class MainActivity extends Activity {
                     if (cursor.moveToLast()) {
                         curLevel = cursor.getInt(2);
                         GridLayout gridLayout = findViewById(R.id.metering_history);
-                        if (historyRecords >= 30) {
+                        if (historyRecordsSize >= 30) {
                             gridLayout.removeAllViews();
                             cursor.moveToPosition(cursor.getPosition() - 30);
-                            historyRecords = 0;
+                            historyRecordsSize = 0;
                             for (int i = 0; i < 30; i++) {
                                 addToHistory(cursor, gridLayout);
                                 cursor.moveToNext();
@@ -100,7 +104,6 @@ public class MainActivity extends Activity {
             startService(intent);
         }
     }
-
     private double getAvgVoltage() {
         Cursor cursor=null;
         try {
@@ -124,16 +127,17 @@ public class MainActivity extends Activity {
                     cursor.getDouble(i)) : String.valueOf(cursor.getInt(i)));
             GridLayout.LayoutParams layoutParams = new GridLayout.LayoutParams(
                     GridLayout.spec(i),
-                    GridLayout.spec(historyRecords)
+                    GridLayout.spec(historyRecordsSize)
             );
             gridLayout.addView(textView, layoutParams);
         }
-        historyRecords++;
+        historyRecordsSize++;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        created = false;
         if (db != null) {
             db.close();
         }
@@ -155,9 +159,13 @@ public class MainActivity extends Activity {
 
     public void reset(View view) {
         db.execSQL("delete from STATE");
-        historyRecords = 0;
+        historyRecordsSize = 0;
         GridLayout gridLayout = findViewById(R.id.metering_history);
         gridLayout.removeAllViews();
+    }
+
+    public static boolean isCreated() {
+        return created;
     }
 
 }

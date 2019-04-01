@@ -10,7 +10,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.BatteryManager;
@@ -101,8 +100,10 @@ public class MainIntentService extends IntentService {
             if(db != null) {
                 BatteryCapacityDBHelper.insert(db, curVoltage, curCurrent, curLevel);
             }
-            Intent capIntent = new Intent(MainActivity.ADD_STATE);
-            sendBroadcast(capIntent);
+            if(MainActivity.isCreated()) {
+                Intent capIntent = new Intent(MainActivity.ADD_STATE);
+                sendBroadcast(capIntent);
+            }
         }
     }
 
