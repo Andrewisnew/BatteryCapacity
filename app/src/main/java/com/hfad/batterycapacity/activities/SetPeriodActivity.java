@@ -1,4 +1,4 @@
-package com.hfad.batterycapacity;
+package com.hfad.batterycapacity.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.hfad.batterycapacity.config.Preferences;
+import com.hfad.batterycapacity.R;
+import com.hfad.batterycapacity.model.Preferences;
 
 public class SetPeriodActivity extends AppCompatActivity {
     private Preferences preferences;

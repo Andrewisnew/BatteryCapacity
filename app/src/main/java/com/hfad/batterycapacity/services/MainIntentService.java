@@ -1,4 +1,4 @@
-package com.hfad.batterycapacity;
+package com.hfad.batterycapacity.services;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -15,7 +15,10 @@ import android.database.sqlite.SQLiteException;
 import android.os.BatteryManager;
 import android.widget.Toast;
 
-import com.hfad.batterycapacity.config.Preferences;
+import com.hfad.batterycapacity.model.db.BatteryCapacityDBHelper;
+import com.hfad.batterycapacity.R;
+import com.hfad.batterycapacity.activities.MainActivity;
+import com.hfad.batterycapacity.model.Preferences;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <activity android:name=".MainActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,16 +24,16 @@
         </activity>
 
         <service
-            android:name=".MainIntentService"
+            android:name=".services.MainIntentService"
             android:exported="false" />
 
-        <receiver android:name=".AutorunBroadcastReceiver">
+        <receiver android:name=".config.AutorunBroadcastReceiver">
             <intent-filter android:priority="999">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <activity android:name=".SetPeriodActivity"/>
+        <activity android:name=".activities.SetPeriodActivity"/>
     </application>
 
 </manifest>

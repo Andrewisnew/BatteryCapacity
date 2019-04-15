@@ -1,4 +1,4 @@
-package com.hfad.batterycapacity;
+package com.hfad.batterycapacity.model.db;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class BatteryCapacityDBHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "battery_capacity";
     private static final int DB_VERSION = 1;
-    BatteryCapacityDBHelper(Context context){
+    public BatteryCapacityDBHelper(Context context){
         super(context, DB_NAME, null, DB_VERSION);
     }
     @Override

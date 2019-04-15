@@ -1,4 +1,4 @@
-package com.hfad.batterycapacity.config;
+package com.hfad.batterycapacity.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
