@@ -17,45 +17,47 @@ import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hfad.batterycapacity.entities.BatteryState;
 import com.hfad.batterycapacity.model.db.BatteryCapacityDBHelper;
+import com.hfad.batterycapacity.model.db.BatteryStateDBHelper;
 import com.hfad.batterycapacity.services.MainIntentService;
 import com.hfad.batterycapacity.R;
 import com.hfad.batterycapacity.model.Preferences;
+
+import java.util.Collections;
+import java.util.List;
 
 
 public class MainActivity extends Activity {
 
     public static final String ADD_STATE = "ADD_STATE";
-
-    private static boolean created = false;
+    public static final String LOG = "LOG";
+    private static final int LIMIT_METERING_HISTORY = 30;
+    private static boolean created;
 
     private int historyRecordsSize;
-    private SQLiteDatabase db;
+    private BatteryStateDBHelper batteryStateDBHelper;
     private int startLevel;
     private int curLevel;
     private static int NUM_OF_METERINGS_PER_HOUR;
     private Preferences preferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(LOG, getClass().toString() + " onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         created = true;
-        try {
-            db = new BatteryCapacityDBHelper(this).getReadableDatabase();
-        } catch (SQLiteException e) {
-            Log.d("SQLiteException", e.getMessage());
-            Toast toast = Toast.makeText(this, "Database unavailable", Toast.LENGTH_SHORT);
-            toast.show();
-        }
 
         preferences = new Preferences(this);
+        batteryStateDBHelper = new BatteryStateDBHelper(this);
 
-        int p = preferences.loadPeriod();
-        if(p == -1){
+        int period = preferences.loadPeriod();
+        if (period == -1) {
             Intent intent = new Intent(this, SetPeriodActivity.class);
             startActivity(intent);
-        }else {
-            NUM_OF_METERINGS_PER_HOUR = 3600 / p;
+        } else {
+            NUM_OF_METERINGS_PER_HOUR = 3600 / period;
 
             addMeteringHistory();
 
@@ -64,42 +66,49 @@ public class MainActivity extends Activity {
             BroadcastReceiver br = new BroadcastReceiver() {
                 @SuppressLint("DefaultLocale")
                 public void onReceive(Context context, Intent intent) {
-                    Cursor cursor = db.query("STATE",
-                            new String[]{"VOLTAGE", "CURRENT", "LEVEL"},
-                            null, null, null, null, null);
-                    if (cursor.moveToLast()) {
-                        curLevel = cursor.getInt(2);
+                    List<BatteryState> states = batteryStateDBHelper.getLast(LIMIT_METERING_HISTORY);
+                    if (!states.isEmpty()) {
+                        curLevel = states.get(states.size() - 1).getLevel();
                         GridLayout gridLayout = findViewById(R.id.metering_history);
                         if (historyRecordsSize >= 30) {
                             gridLayout.removeAllViews();
-                            cursor.moveToPosition(cursor.getPosition() - 30);
+
                             historyRecordsSize = 0;
-                            for (int i = 0; i < 30; i++) {
-                                addToHistory(cursor, gridLayout);
-                                cursor.moveToNext();
+                            System.err.println("SIZEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE" +  states.size());
+                            for (int i = 0; i < states.size(); i++) {
+                                System.out.println(states.get(i));
+                                addToHistory(states.get(i), gridLayout);
                             }
                         } else {
-                            addToHistory(cursor, gridLayout);
+                            addToHistory(states.get(states.size() - 1), gridLayout);
+                            System.out.println(states.get(states.size() - 1));
                         }
+                    }else {
+                        System.err.println(states.size() + " FAIL");
+                    }
+                    List<BatteryState> allStates = batteryStateDBHelper.getAll();
 
-                        if (cursor.moveToFirst()) {
+                    if (!allStates.isEmpty()) {
+
+                        startLevel = allStates.get(0).getLevel();
+
+                        if (startLevel != curLevel) {
                             int capacity;
                             double sumOfPowers = 0;
-                            startLevel = cursor.getInt(2);
-                            do {
-                                sumOfPowers += cursor.getDouble(0) * cursor.getDouble(1);
-                            } while (cursor.moveToNext());
-
-                            if (startLevel != curLevel) {
-                                capacity = (int) (sumOfPowers / (getAvgVoltage() * NUM_OF_METERINGS_PER_HOUR)
-                                        * 100 / (curLevel - startLevel) * 1000);
-                                capacityValView.setText(String.valueOf(capacity));
-                            } else {
-                                capacityValView.setText("-");
+                            for (BatteryState state : allStates) {
+                                sumOfPowers += state.getCurrent() * state.getVoltage();
                             }
+                            capacity = (int) (sumOfPowers / (batteryStateDBHelper.getAvgVoltage() * NUM_OF_METERINGS_PER_HOUR)
+                                    * 100 / (curLevel - startLevel) * 1000);
+                            capacityValView.setText(String.valueOf(capacity));
+                        } else {
+                            capacityValView.setText("-");
+                            Toast toast = Toast.makeText(MainActivity.this, "s="+startLevel +" c="+curLevel
+                                    , Toast.LENGTH_SHORT);
+                            toast.show();
                         }
                     }
-                    cursor.close();
+
                 }
             };
             registerReceiver(br, new IntentFilter(ADD_STATE));
@@ -107,27 +116,25 @@ public class MainActivity extends Activity {
             startService(intent);
         }
     }
-    private double getAvgVoltage() {
-        Cursor cursor=null;
-        try {
-            cursor = db.rawQuery("SELECT AVG(VOLTAGE) FROM STATE", null);
-            cursor.moveToFirst();
-            return cursor.getDouble(0);
-        }finally {
-            if(cursor!=null){
-                cursor.close();
-            }
-        }
-    }
+
 
     @SuppressLint("DefaultLocale")
-    private void addToHistory(Cursor cursor, GridLayout gridLayout) {
+    private void addToHistory(BatteryState state, GridLayout gridLayout) {
         for (int i = 0; i < 3; i++) {
             TextView textView = new TextView(this);
             textView.setPadding(5, 0, 5, 0);
             textView.setGravity(Gravity.CENTER);
-            textView.setText(i < 2 ? String.format("%.2f",
-                    cursor.getDouble(i)) : String.valueOf(cursor.getInt(i)));
+            switch (i) {
+                case 0:
+                    textView.setText(String.format("%.2f", state.getVoltage()));
+                    break;
+                case 1:
+                    textView.setText(String.format("%.2f", state.getCurrent()));
+                    break;
+                case 2:
+                    textView.setText(String.valueOf(state.getLevel()));
+                    break;
+            }
             GridLayout.LayoutParams layoutParams = new GridLayout.LayoutParams(
                     GridLayout.spec(i),
                     GridLayout.spec(historyRecordsSize)
@@ -141,27 +148,22 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         created = false;
-        if (db != null) {
-            db.close();
+        if (batteryStateDBHelper != null) {
+            batteryStateDBHelper.close();
         }
     }
 
     @SuppressLint("DefaultLocale")
     private void addMeteringHistory() {
-        Cursor cursor = db.query("STATE",
-                new String[]{"VOLTAGE", "CURRENT", "LEVEL"},
-                null, null, null, null, "_id DESC", "30");
+        List<BatteryState> states = batteryStateDBHelper.getLast(LIMIT_METERING_HISTORY);
         GridLayout gridLayout = findViewById(R.id.metering_history);
-        if (cursor.moveToLast()) {
-            while (cursor.moveToPrevious()) {
-                addToHistory(cursor, gridLayout);
-            }
+        for (BatteryState state : states) {
+            addToHistory(state, gridLayout);
         }
-        cursor.close();
     }
 
     public void reset(View view) {
-        db.execSQL("delete from STATE");
+        batteryStateDBHelper.deleteAll();
         historyRecordsSize = 0;
         GridLayout gridLayout = findViewById(R.id.metering_history);
         gridLayout.removeAllViews();

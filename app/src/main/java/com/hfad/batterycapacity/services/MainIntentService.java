@@ -13,24 +13,27 @@ import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.BatteryManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.hfad.batterycapacity.model.db.BatteryCapacityDBHelper;
 import com.hfad.batterycapacity.R;
 import com.hfad.batterycapacity.activities.MainActivity;
 import com.hfad.batterycapacity.model.Preferences;
+import com.hfad.batterycapacity.model.db.BatteryStateDBHelper;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class MainIntentService extends IntentService {
+    private static final String LOG = "LOG";
     private Preferences preferences;
+    private BatteryStateDBHelper batteryStateDBHelper;
 
     private double curCurrent;
     private double curVoltage;
     private int curLevel = -1;
     private int startLevel;
-    private SQLiteDatabase db;
 
     public MainIntentService() {
         super("MainIntentService");
@@ -40,13 +43,7 @@ public class MainIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
         preferences = new Preferences(this);
-        try {
-            db = new BatteryCapacityDBHelper(this).getWritableDatabase();
-        } catch(SQLiteException e) {
-            Toast toast = Toast.makeText(this, "Database unavailable", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-
+        batteryStateDBHelper = new BatteryStateDBHelper(this);
         Intent intent = new Intent(this, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MainActivity.class);
@@ -83,14 +80,14 @@ public class MainIntentService extends IntentService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(db != null){
-            db.close();
+        if(batteryStateDBHelper != null){
+            batteryStateDBHelper.close();
         }
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        registerBatteryResiver();
+        registerBatteryReceiver();
         int period = preferences.loadPeriod();
         while (true) {
             synchronized (this) {
@@ -100,8 +97,10 @@ public class MainIntentService extends IntentService {
                     e.printStackTrace();
                 }
             }
-            if(db != null) {
-                BatteryCapacityDBHelper.insert(db, curVoltage, curCurrent, curLevel);
+            if(batteryStateDBHelper != null) {
+                batteryStateDBHelper.insert(curVoltage, curCurrent, curLevel);
+            } else {
+                Log.e(LOG, getClass() + " insert fail");
             }
             if(MainActivity.isCreated()) {
                 Intent capIntent = new Intent(MainActivity.ADD_STATE);
@@ -110,7 +109,7 @@ public class MainIntentService extends IntentService {
         }
     }
 
-    public void registerBatteryResiver() {
+    public void registerBatteryReceiver() {
         BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -144,7 +143,4 @@ public class MainIntentService extends IntentService {
         IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         registerReceiver(batteryReceiver, filter);
     }
-
-
-
 }
