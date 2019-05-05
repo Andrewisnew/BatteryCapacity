@@ -4,24 +4,76 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.widget.Toast;
 
 import com.hfad.batterycapacity.entities.BatteryState;
+import com.hfad.batterycapacity.entities.MeteringResult;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BatteryStateDBHelper extends BatteryCapacityDBHelper {
 
-    private static final String TABLE_NAME = "BATTERY_STATE";
-
-    public void deleteAll() {
-        getWritableDatabase().execSQL("delete from " + TABLE_NAME);
-    }
-
     enum Columns {
         VOLTAGE,
         CURRENT,
         LEVEL
+    }
+
+    private static final String TABLE_NAME = "BATTERY_STATE";
+
+    private boolean empty = statesCount() == 0;
+
+    public boolean isEmpty() {
+        return empty;
+    }
+
+    public void deleteAll() {
+        getWritableDatabase().execSQL("delete from " + TABLE_NAME);
+        empty = true;
+
+    }
+
+    public int statesCount() {
+        Cursor cursor = null;
+        try {
+            cursor = getReadableDatabase()
+                    .rawQuery("SELECT COUNT(*) FROM " + TABLE_NAME,
+                            null);
+            cursor.moveToFirst();
+            return cursor.getInt(0);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    public MeteringResult getMeteringResult() {
+        Cursor cursor = null;
+        try {
+            cursor = getReadableDatabase().query(TABLE_NAME,
+                    new String[]{Columns.CURRENT.name(), Columns.VOLTAGE.name(),  Columns.LEVEL.name()},
+                    null, null, null, null,
+                    null, null);
+            cursor.moveToFirst();
+            double sumOfPowers = 0;
+            double sumOfVoltages = 0;
+            int startLevel = cursor.getInt(2);
+            do{
+                double voltage = cursor.getDouble(1);
+                sumOfPowers += cursor.getDouble(0)*voltage;
+                sumOfVoltages += voltage;
+            }while (cursor.moveToNext());
+            cursor.moveToLast();
+            int finishLevel = cursor.getInt(2);
+            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"+startLevel + "   " + finishLevel + "   "+ cursor.getCount() + "   v "+cursor.getDouble(1));
+            return new MeteringResult(sumOfPowers, sumOfVoltages / cursor.getCount(), startLevel, finishLevel);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     public BatteryStateDBHelper(Context context) {
@@ -36,12 +88,13 @@ public class BatteryStateDBHelper extends BatteryCapacityDBHelper {
                 + Columns.LEVEL + " INTEGER);");
     }
 
-    public void insert(double voltage, double current, int level) {
+    public void insert(BatteryState batteryState) {
         ContentValues stateValues = new ContentValues();
-        stateValues.put(Columns.VOLTAGE.name(), voltage);
-        stateValues.put(Columns.CURRENT.name(), current);
-        stateValues.put(Columns.LEVEL.name(), level);
+        stateValues.put(Columns.VOLTAGE.name(), batteryState.getVoltage());
+        stateValues.put(Columns.CURRENT.name(), batteryState.getCurrent());
+        stateValues.put(Columns.LEVEL.name(), batteryState.getLevel());
         getWritableDatabase().insert(TABLE_NAME, null, stateValues);
+        empty = false;
     }
 
     public List<BatteryState> getLast(int limit) {

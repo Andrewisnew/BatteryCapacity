@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-public class BatteryCapacityDBHelper extends SQLiteOpenHelper {
+public abstract class BatteryCapacityDBHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "battery_capacity";
     private static final int DB_VERSION = 1;
     protected static final String LOG = "LOG";
@@ -25,7 +25,7 @@ public class BatteryCapacityDBHelper extends SQLiteOpenHelper {
     private void updateDatabase(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < DB_VERSION) {
             BatteryStateDBHelper.createTable(db);
-
+            MeteringResultDBHelper.createTable(db);
         }
     }
 }

@@ -10,25 +10,26 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.BatteryManager;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.hfad.batterycapacity.model.db.BatteryCapacityDBHelper;
+import com.hfad.batterycapacity.entities.BatteryState;
+import com.hfad.batterycapacity.entities.MeteringResult;
 import com.hfad.batterycapacity.R;
 import com.hfad.batterycapacity.activities.MainActivity;
 import com.hfad.batterycapacity.model.Preferences;
 import com.hfad.batterycapacity.model.db.BatteryStateDBHelper;
+import com.hfad.batterycapacity.model.db.MeteringResultDBHelper;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.concurrent.TimeUnit;
 
 public class MainIntentService extends IntentService {
     private static final String LOG = "LOG";
     private Preferences preferences;
     private BatteryStateDBHelper batteryStateDBHelper;
+    private MeteringResultDBHelper meteringResultDBHelper;
 
     private double curCurrent;
     private double curVoltage;
@@ -42,8 +43,18 @@ public class MainIntentService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i(LOG, getClass().toString() + " onCreate");
         preferences = new Preferences(this);
         batteryStateDBHelper = new BatteryStateDBHelper(this);
+        meteringResultDBHelper = new MeteringResultDBHelper(this);
+
+        if(!batteryStateDBHelper.isEmpty()){
+            computeMeteringResult();
+        }
+        createNotification();
+    }
+
+    private void createNotification() {
         Intent intent = new Intent(this, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MainActivity.class);
@@ -80,8 +91,12 @@ public class MainIntentService extends IntentService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.i(LOG, getClass().toString() + " onDestroy");
         if(batteryStateDBHelper != null){
             batteryStateDBHelper.close();
+        }
+        if(meteringResultDBHelper != null){
+            meteringResultDBHelper.close();
         }
     }
 
@@ -92,19 +107,22 @@ public class MainIntentService extends IntentService {
         while (true) {
             synchronized (this) {
                 try {
-                    wait(period * 1000);
+                    TimeUnit.SECONDS.sleep(period);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            if(batteryStateDBHelper != null) {
-                batteryStateDBHelper.insert(curVoltage, curCurrent, curLevel);
-            } else {
-                Log.e(LOG, getClass() + " insert fail");
-            }
-            if(MainActivity.isCreated()) {
-                Intent capIntent = new Intent(MainActivity.ADD_STATE);
-                sendBroadcast(capIntent);
+            Log.i(LOG, getClass().toString() + " : " + curCurrent);
+            if(curCurrent >= 0){
+                if(!batteryStateDBHelper.isEmpty()){
+                    computeMeteringResult();
+                }
+            }else{
+                batteryStateDBHelper.insert(new BatteryState(curVoltage, curCurrent, curLevel));
+                if(MainActivity.isCreated()) {
+                    Intent capIntent = new Intent(MainActivity.AddedBatteryStateReceiver.ACTION);
+                    sendBroadcast(capIntent);
+                }
             }
         }
     }
@@ -142,5 +160,21 @@ public class MainIntentService extends IntentService {
         };
         IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         registerReceiver(batteryReceiver, filter);
+    }
+
+    private void computeMeteringResult() {
+        MeteringResult meteringResult = batteryStateDBHelper.getMeteringResult();
+        batteryStateDBHelper.deleteAll();
+        if(MainActivity.isCreated()) {
+            Intent removeMeterHistIntent = new Intent(MainActivity.RemovedMeteringHistoryBroadcastReceiver.ACTION);
+            sendBroadcast(removeMeterHistIntent);
+        }
+        if(meteringResult.getStartLevel() != meteringResult.getFinishLevel()) {
+            meteringResultDBHelper.insert(meteringResult);
+            if(MainActivity.isCreated()) {
+                Intent addedMeteringResultIntent = new Intent(MainActivity.RemovedMeteringHistoryBroadcastReceiver.ACTION);
+                sendBroadcast(addedMeteringResultIntent);
+            }
+        }
     }
 }

@@ -33,7 +33,11 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".activities.SetPeriodActivity"/>
+        <activity android:name=".activities.SetPeriodActivity" />
+        <activity
+            android:name=".activities.MeteringResultsActivity"
+            android:label="@string/title_activity_metering_results"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
