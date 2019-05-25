@@ -37,7 +37,7 @@ public class MeteringResultsActivity extends Activity {
         GridLayout gridLayout = findViewById(R.id.metering_results_table);
         int meteringResultsSize = 1;
         for (MeteringResult meteringResult : meteringResults) {
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 5; i++) {
                 TextView textView = new TextView(this);
                 textView.setPadding(5, 0, 5, 0);
                 textView.setGravity(Gravity.CENTER);
@@ -54,6 +54,8 @@ public class MeteringResultsActivity extends Activity {
                     case 3:
                         textView.setText(String.valueOf(meteringResult.getFinishLevel()));
                         break;
+                    case 4:
+                        textView.setText(String.valueOf(computeAndGetCapacity(meteringResult)));
 
                 }
                 GridLayout.LayoutParams layoutParams = new GridLayout.LayoutParams(
@@ -64,6 +66,13 @@ public class MeteringResultsActivity extends Activity {
             }
             meteringResultsSize++;
         }
+
+    }
+
+    private int computeAndGetCapacity(MeteringResult meteringResult) {
+
+        return  (int) (meteringResult.getSumOfPowers() / (meteringResult.getAvgVoltage() * MainActivity.NUM_OF_METERINGS_PER_HOUR)
+                * 100 / (meteringResult.getFinishLevel() - meteringResult.getStartLevel()) * 1000);
 
     }
 

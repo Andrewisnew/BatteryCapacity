@@ -125,7 +125,7 @@ public class BatteryStateDBHelper extends BatteryCapacityDBHelper {
                 states.add(new BatteryState(cursor.getDouble(0),
                         cursor.getDouble(1),
                         cursor.getInt(2)));
-            }while (cursor.moveToPrevious());
+            }while (cursor.moveToNext());
         }
         cursor.close();
         return states;

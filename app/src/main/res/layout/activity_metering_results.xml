@@ -5,30 +5,49 @@
     android:layout_height="match_parent"
     tools:context=".activities.MeteringResultsActivity">
 
-    <GridLayout
-        android:id="@+id/metering_results_table"
-        android:layout_width="wrap_content"
+    <ScrollView
+        android:id="@+id/history_scroll"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="37dp"
-        android:columnCount="4">
-        <TextView android:text="@string/total_power"
-            android:layout_gravity="fill"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"/>
-        <TextView android:text="@string/average_voltage"
-            android:layout_gravity="fill"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"/>
-        <TextView android:text="@string/start_level"
-            android:layout_gravity="fill"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"/>
-        <TextView android:text="@string/finish_level"
-            android:layout_gravity="fill"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"/>
-    </GridLayout>
+        android:layout_below="@id/capacity_label"
+        android:layout_marginTop="18dp">
 
+        <GridLayout
+            android:id="@+id/metering_results_table"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="37dp"
+            android:columnCount="5">
+
+            <TextView
+                android:layout_gravity="fill"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/total_power" />
+
+            <TextView
+                android:layout_gravity="fill"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/average_voltage" />
+
+            <TextView
+                android:layout_gravity="fill"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/start_level" />
+
+            <TextView
+                android:layout_gravity="fill"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/finish_level" />
+
+            <TextView
+                android:layout_gravity="fill"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/capacity" />
+        </GridLayout>
+    </ScrollView>
 </RelativeLayout>

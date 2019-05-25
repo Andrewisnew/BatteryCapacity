@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
     private AddedBatteryStateReceiver addedBatteryStateReceiver;
     private RemovedMeteringHistoryBroadcastReceiver removedMeteringHistoryBroadcastReceiver;
     private AddedMeteringResultBroadcastReceiver addedMeteringResultBroadcastReceiver;
-    private static int NUM_OF_METERINGS_PER_HOUR;
+    public static int NUM_OF_METERINGS_PER_HOUR;
     private Preferences preferences;
 
     @Override

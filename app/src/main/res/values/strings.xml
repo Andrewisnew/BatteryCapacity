@@ -7,8 +7,9 @@
     <string name="set">Set</string>
     <string name="title_activity_metering_results">MeteringResultsActivity</string>
     <string name="sum_of_powers">sum of powers</string>
-    <string name="average_voltage">average voltage</string>
-    <string name="start_level">start level</string>
-    <string name="finish_level">finish level</string>
-    <string name="total_power">total power</string>
+    <string name="average_voltage">avg voltage</string>
+    <string name="start_level">start</string>
+    <string name="finish_level">finish</string>
+    <string name="total_power">power</string>
+    <string name="capacity">capacity</string>
 </resources>
