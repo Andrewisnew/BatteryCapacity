@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.hfad.batterycapacity.entities.BatteryState;
 import com.hfad.batterycapacity.entities.MeteringResult;
 
 import java.util.ArrayList;

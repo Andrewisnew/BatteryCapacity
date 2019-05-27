@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.widget.Toast;
 
 import com.hfad.batterycapacity.entities.BatteryState;
 import com.hfad.batterycapacity.entities.MeteringResult;

@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.GridLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.hfad.batterycapacity.R;
 import com.hfad.batterycapacity.entities.MeteringResult;
