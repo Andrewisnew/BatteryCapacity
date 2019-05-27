@@ -34,7 +34,7 @@ public class MainIntentService extends IntentService {
     private double curCurrent;
     private double curVoltage;
     private int curLevel = -1;
-    private int startLevel;
+    private int startLevel = -1;
 
     public MainIntentService() {
         super("MainIntentService");
@@ -117,7 +117,7 @@ public class MainIntentService extends IntentService {
                 if(!batteryStateDBHelper.isEmpty()){
                     computeMeteringResult();
                 }
-            }else{
+            }else if (curLevel < startLevel){
                 batteryStateDBHelper.insert(new BatteryState(curVoltage, curCurrent, curLevel));
                 if(MainActivity.isCreated()) {
                     Intent capIntent = new Intent(MainActivity.AddedBatteryStateReceiver.ACTION);
@@ -134,7 +134,7 @@ public class MainIntentService extends IntentService {
 
                 curVoltage = intent
                         .getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000.0;
-                if(curLevel == -1){
+                if(startLevel == -1){
                     startLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                     curLevel = startLevel;
                 }else {

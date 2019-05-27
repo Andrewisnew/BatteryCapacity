@@ -60,15 +60,29 @@ public class BatteryStateDBHelper extends BatteryCapacityDBHelper {
             double sumOfPowers = 0;
             double sumOfVoltages = 0;
             int startLevel = cursor.getInt(2);
+            int finishLevel = startLevel;
+            double sumOfPowersForCurrLevel = 0;
+            double sumOfVoltagesForCurrLevel = 0;
+            double count = 0;
+            double countForCurrLevel = count;
             do{
-                double voltage = cursor.getDouble(1);
-                sumOfPowers += cursor.getDouble(0)*voltage;
-                sumOfVoltages += voltage;
+                int currLevel = cursor.getInt(2);
+                if(finishLevel == currLevel) {
+                    double voltage = cursor.getDouble(1);
+                    sumOfPowersForCurrLevel += cursor.getDouble(0) * voltage;
+                    sumOfVoltagesForCurrLevel += voltage;
+                    countForCurrLevel++;
+                } else {
+                    sumOfPowers += sumOfPowersForCurrLevel;
+                    sumOfVoltages += sumOfVoltagesForCurrLevel;
+                    count += countForCurrLevel;
+                    sumOfPowersForCurrLevel = 0;
+                    sumOfVoltagesForCurrLevel = 0;
+                    countForCurrLevel = 0;
+                    finishLevel = currLevel;
+                }
             }while (cursor.moveToNext());
-            cursor.moveToLast();
-            int finishLevel = cursor.getInt(2);
-            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"+startLevel + "   " + finishLevel + "   "+ cursor.getCount() + "   v "+cursor.getDouble(1));
-            return new MeteringResult(sumOfPowers, sumOfVoltages / cursor.getCount(), startLevel, finishLevel);
+            return new MeteringResult(sumOfPowers, sumOfVoltages / count, startLevel, finishLevel);
         } finally {
             if (cursor != null) {
                 cursor.close();

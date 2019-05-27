@@ -115,9 +115,15 @@ public class MainActivity extends Activity {
         if (meteringResultDBHelper != null) {
             meteringResultDBHelper.close();
         }
-        unregisterReceiver(addedBatteryStateReceiver);
-        unregisterReceiver(removedMeteringHistoryBroadcastReceiver);
-        unregisterReceiver(addedMeteringResultBroadcastReceiver);
+        if(addedBatteryStateReceiver != null){
+            unregisterReceiver(addedBatteryStateReceiver);
+        }
+        if(removedMeteringHistoryBroadcastReceiver != null){
+            unregisterReceiver(removedMeteringHistoryBroadcastReceiver);
+        }
+        if(addedMeteringResultBroadcastReceiver != null){
+            unregisterReceiver(addedMeteringResultBroadcastReceiver);
+        }
     }
 
     @SuppressLint("DefaultLocale")
