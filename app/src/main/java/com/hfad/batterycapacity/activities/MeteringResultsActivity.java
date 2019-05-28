@@ -42,7 +42,7 @@ public class MeteringResultsActivity extends Activity {
                 textView.setGravity(Gravity.CENTER);
                 switch (i) {
                     case 0:
-                        textView.setText(String.format("%.2f", meteringResult.getSumOfPowers()));
+                        textView.setText(String.format("%.2f", -meteringResult.getSumOfPowers()));
                         break;
                     case 1:
                         textView.setText(String.format("%.2f", meteringResult.getAvgVoltage()));

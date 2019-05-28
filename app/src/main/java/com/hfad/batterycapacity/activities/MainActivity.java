@@ -10,7 +10,9 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hfad.batterycapacity.entities.BatteryState;
@@ -57,16 +59,29 @@ public class MainActivity extends Activity {
             startActivity(intent);
         } else {
             NUM_OF_METERINGS_PER_HOUR = 3600 / period;
-            TextView capacityValView = findViewById(R.id.capacity_value);
+            TextView capacityValView = findViewById(R.id.capacity_label);
             computeAndSaveCapacity();
             int capacity = preferences.loadCapacity();
             if (capacity == -1) {
-                capacityValView.setText("not computed");
+                capacityValView.setText("Capacity not computed");
             } else {
-                capacityValView.setText(String.valueOf(capacity));
+                capacityValView.setText("Capacity: " + capacity + " mAh");
+                ImageView image = findViewById(R.id.accu_green);
+                ViewGroup.LayoutParams layoutParams = image.getLayoutParams();
+                image.requestLayout();
+                layoutParams.width = (int) (400 * capacity / getBatteryCapacity(this));
+                image.setLayoutParams(layoutParams);
+                image.setScaleType(ImageView.ScaleType.FIT_XY);
             }
 
             addMeteringHistory();
+
+            int totalLevelInterval = meteringResultDBHelper.getTotalLevelInterval();
+            if(totalLevelInterval > 0){
+                TextView totalLevelIntervalView = findViewById(R.id.total_level_interval);
+                totalLevelIntervalView.setText("Computed by " + totalLevelInterval + "% discharged");
+            }
+
 
             addedBatteryStateReceiver = new AddedBatteryStateReceiver();
             registerReceiver(addedBatteryStateReceiver, new IntentFilter(AddedBatteryStateReceiver.ACTION));
@@ -213,5 +228,28 @@ public class MainActivity extends Activity {
                 * 100 / (totalLevelDifference) * 1000);
         preferences.saveCapacity(capacity);
         return true;
+    }
+
+    private double getBatteryCapacity(Context context) {
+        Object mPowerProfile;
+        double batteryCapacity = 0;
+        final String POWER_PROFILE_CLASS = "com.android.internal.os.PowerProfile";
+
+        try {
+            mPowerProfile = Class.forName(POWER_PROFILE_CLASS)
+                    .getConstructor(Context.class)
+                    .newInstance(context);
+
+            batteryCapacity = (double) Class
+                    .forName(POWER_PROFILE_CLASS)
+                    .getMethod("getBatteryCapacity")
+                    .invoke(mPowerProfile);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return batteryCapacity;
+
     }
 }

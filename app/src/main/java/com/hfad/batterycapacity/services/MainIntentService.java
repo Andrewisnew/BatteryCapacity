@@ -48,7 +48,7 @@ public class MainIntentService extends IntentService {
         batteryStateDBHelper = new BatteryStateDBHelper(this);
         meteringResultDBHelper = new MeteringResultDBHelper(this);
 
-        if(!batteryStateDBHelper.isEmpty()){
+        if (!batteryStateDBHelper.isEmpty()) {
             computeMeteringResult();
         }
         createNotification();
@@ -85,17 +85,17 @@ public class MainIntentService extends IntentService {
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_MAX)
                 .build();
-        startForeground (143, notification);
+        startForeground(143, notification);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.i(LOG, getClass().toString() + " onDestroy");
-        if(batteryStateDBHelper != null){
+        if (batteryStateDBHelper != null) {
             batteryStateDBHelper.close();
         }
-        if(meteringResultDBHelper != null){
+        if (meteringResultDBHelper != null) {
             meteringResultDBHelper.close();
         }
     }
@@ -105,21 +105,20 @@ public class MainIntentService extends IntentService {
         registerBatteryReceiver();
         int period = preferences.loadPeriod();
         while (true) {
-            synchronized (this) {
-                try {
-                    TimeUnit.SECONDS.sleep(period);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            try {
+                TimeUnit.SECONDS.sleep(period);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+
             Log.i(LOG, getClass().toString() + " : " + curCurrent);
-            if(curCurrent >= 0){
-                if(!batteryStateDBHelper.isEmpty()){
+            if (curCurrent >= 0) {
+                if (!batteryStateDBHelper.isEmpty()) {
                     computeMeteringResult();
                 }
-            }else if (curLevel < startLevel){
+            } else if (curLevel < startLevel) {
                 batteryStateDBHelper.insert(new BatteryState(curVoltage, curCurrent, curLevel));
-                if(MainActivity.isCreated()) {
+                if (MainActivity.isCreated()) {
                     Intent capIntent = new Intent(MainActivity.AddedBatteryStateReceiver.ACTION);
                     sendBroadcast(capIntent);
                 }
@@ -134,10 +133,10 @@ public class MainIntentService extends IntentService {
 
                 curVoltage = intent
                         .getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000.0;
-                if(startLevel == -1){
+                if (startLevel == -1) {
                     startLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                     curLevel = startLevel;
-                }else {
+                } else {
                     curLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                 }
 
@@ -165,13 +164,13 @@ public class MainIntentService extends IntentService {
     private void computeMeteringResult() {
         MeteringResult meteringResult = batteryStateDBHelper.getMeteringResult();
         batteryStateDBHelper.deleteAll();
-        if(MainActivity.isCreated()) {
+        if (MainActivity.isCreated()) {
             Intent removeMeterHistIntent = new Intent(MainActivity.RemovedMeteringHistoryBroadcastReceiver.ACTION);
             sendBroadcast(removeMeterHistIntent);
         }
-        if(meteringResult.getStartLevel() != meteringResult.getFinishLevel()) {
+        if (meteringResult.getStartLevel() != meteringResult.getFinishLevel()) {
             meteringResultDBHelper.insert(meteringResult);
-            if(MainActivity.isCreated()) {
+            if (MainActivity.isCreated()) {
                 Intent addedMeteringResultIntent = new Intent(MainActivity.RemovedMeteringHistoryBroadcastReceiver.ACTION);
                 sendBroadcast(addedMeteringResultIntent);
             }

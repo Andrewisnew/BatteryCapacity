@@ -32,6 +32,11 @@ public class SetPeriodActivity extends AppCompatActivity {
             toast.show();
         }else {
             int period = Integer.parseInt(periodEditText.getText().toString());
+            if(period < 1 || period > 20){
+                Toast toast = Toast.makeText(this, "Enter period", Toast.LENGTH_SHORT);
+                toast.show();
+                return;
+            }
             preferences.savePeriod(period);
 
             Intent intent = new Intent(this, MainActivity.class);

@@ -68,4 +68,21 @@ public class MeteringResultDBHelper extends BatteryCapacityDBHelper {
         cursor.close();
         return meteringResults;
     }
+
+    public int getTotalLevelInterval(){
+        Cursor cursor = getReadableDatabase().query(TABLE_NAME,
+                new String[]{
+                        Columns.START_LEVEL.name(),
+                        Columns.FINISH_LEVEL.name()},
+                null, null, null, null,
+                null, null);
+        int totalLevelInterval = 0;
+        if (cursor.moveToFirst()) {
+            do {
+                totalLevelInterval += cursor.getInt(0) - cursor.getInt(1);
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
+        return totalLevelInterval;
+    }
 }

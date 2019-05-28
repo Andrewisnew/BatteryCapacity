@@ -13,31 +13,35 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="37dp"
         android:text="@string/capacity_label" />
+    <FrameLayout
 
-    <TextView
-        android:id="@+id/capacity_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/capacity_label"
-        android:layout_toEndOf="@id/capacity_label"
-        android:layout_marginStart="5dp" />
+        android:id="@+id/capacity_view"
+        android:layout_below="@id/capacity_label"
 
-    <TextView
-        android:id="@+id/capacity_derived_unit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/capacity_value"
-        android:layout_toEndOf="@id/capacity_value"
-        android:layout_marginStart="5dp"
-        android:text="@string/capacity_derived_unit" />
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        >
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/gray"/>
+
+        <ImageView
+            android:id="@+id/accu_green"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/green"
+            android:layout_gravity="bottom|left"/>
+
+    </FrameLayout>
     <HorizontalScrollView
         android:id="@+id/history_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/capacity_label"
+        android:layout_below="@id/capacity_view"
         android:layout_marginTop="18dp">
-
         <GridLayout
             android:id="@+id/metering_history"
             android:layout_width="wrap_content"
@@ -45,23 +49,19 @@
 
             android:rowCount="3" />
     </HorizontalScrollView>
-    <Button
-        android:id="@+id/reset"
+    <TextView
+        android:id="@+id/total_level_interval"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/reset"
         android:layout_below="@id/history_scroll"
         android:layout_centerHorizontal="true"
-        android:onClick="reset"
         />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="toMeteringResults"
-        android:layout_below="@id/reset"
+        android:text="To metering results"
+        android:layout_below="@id/total_level_interval"
         android:layout_centerHorizontal="true"
         android:onClick="toMeteringResults"
         />
-
 </RelativeLayout>

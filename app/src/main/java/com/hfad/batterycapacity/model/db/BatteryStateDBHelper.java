@@ -144,18 +144,4 @@ public class BatteryStateDBHelper extends BatteryCapacityDBHelper {
         return states;
     }
 
-    public double getAvgVoltage() {
-        Cursor cursor = null;
-        try {
-            cursor = getReadableDatabase()
-                    .rawQuery("SELECT AVG(" + Columns.VOLTAGE + ") FROM " + TABLE_NAME,
-                            null);
-            cursor.moveToFirst();
-            return cursor.getDouble(0);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
 }
