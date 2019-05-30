@@ -36,6 +36,7 @@ public class MainIntentService extends IntentService {
     private int curLevel = -1;
     private int startLevel = -1;
 
+
     public MainIntentService() {
         super("MainIntentService");
     }
@@ -115,6 +116,7 @@ public class MainIntentService extends IntentService {
             if (curCurrent >= 0) {
                 if (!batteryStateDBHelper.isEmpty()) {
                     computeMeteringResult();
+                    startLevel = -1;
                 }
             } else if (curLevel < startLevel) {
                 batteryStateDBHelper.insert(new BatteryState(curVoltage, curCurrent, curLevel));
@@ -133,12 +135,6 @@ public class MainIntentService extends IntentService {
 
                 curVoltage = intent
                         .getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) / 1000.0;
-                if (startLevel == -1) {
-                    startLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-                    curLevel = startLevel;
-                } else {
-                    curLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-                }
 
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                     BatteryManager mBatteryManager = (BatteryManager)
@@ -154,6 +150,12 @@ public class MainIntentService extends IntentService {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }
+                if (startLevel == -1 && curCurrent < 0) {
+                    startLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                    curLevel = startLevel;
+                } else {
+                    curLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                 }
             }
         };
